@@ -36,65 +36,73 @@ N = 2_000_000
 data = rand(N)
 
 # 1. Summary statistics
-function compute_stats()
-    results = []
-    push!(results, sum(data))
-    push!(results, mean(data))
-    push!(results, maximum(data))
-    push!(results, minimum(data))
-    push!(results, std(data))
+function compute_stats(data)
+    results = Float64[
+        sum(data),
+        mean(data),
+        maximum(data),
+        minimum(data),
+        std(data)
+    ]
+
     return results
 end
-
 # 2. Monte Carlo estimate of pi
 function monte_carlo_pi(n)
     count = 0
+
     for i in 1:n
-        point = [rand(), rand()]
-        if point[1]^2 + point[2]^2 <= 1.0
+        x = rand()
+        y = rand()
+
+        if x^2 + y^2 <= 1.0
             count += 1
         end
     end
+
     return 4 * count / n
 end
 
 # 3. Row sums of a matrix
 function row_sums(A)
     n = size(A, 1)
-    sums = []
+    sums = zeros(eltype(A), n)
+
     for i in 1:n
-        row = A[i, :]
-        push!(sums, sum(row))
+        row = @view A[i, :]
+        sums[i] = sum(row)
     end
+
     return sums
 end
 
 # 4. Build a text report
 function build_report(labels, values)
     report = ""
+
     for i in 1:length(labels)
         report = report * labels[i] * ": " * string(values[i]) * "\n"
     end
+
     return report
 end
 
 # 5. Conditional accumulator
 function unstable_sum(xs)
-    total = 0
+    total = 0.0
+
     for x in xs
         if x > 0.5
             total += x
-        else
-            total += 0
         end
     end
+
     return total
 end
 
 function main()
     println("Computing stats...")
-    stats = compute_stats()
-    println(stats)
+    stats = compute_stats(data)
 
     println("Estimating pi...")
     pi_est = monte_carlo_pi(1_000_000)
@@ -113,5 +121,3 @@ function main()
     println("Summing with condition...")
     println(unstable_sum(data))
 end
-
-@time main()
